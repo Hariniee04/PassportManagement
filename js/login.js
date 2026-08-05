@@ -3,6 +3,7 @@ document.getElementById("loginform").addEventListener("submit", function(event){
     event.preventDefault();
 
 
+    let role = document.getElementById("role").value;
     let email = document.getElementById("email").value;
 
     let password = document.getElementById("password").value;
@@ -26,6 +27,7 @@ document.getElementById("loginform").addEventListener("submit", function(event){
         alert("Login successful");
 
         localStorage.setItem("loggedin", "true");
+        localStorage.setItem("selectedRole", role);
 
         window.location.href = "dashboard.html";
     }
