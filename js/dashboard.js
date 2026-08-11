@@ -1,4 +1,4 @@
-let loggedin = localStorage.getItem("loggedin");
+let loggedin = sessionStorage.getItem("loggedin");
 
 
 if(loggedin != "true")
@@ -8,7 +8,7 @@ if(loggedin != "true")
 
 
 
-let user = JSON.parse(localStorage.getItem("user"));
+let user = JSON.parse(sessionStorage.getItem("user"));
 
 
 document.getElementById("username").innerHTML = user.name;
@@ -17,7 +17,7 @@ document.getElementById("username").innerHTML = user.name;
 
 document.getElementById("logout").addEventListener("click", function(){
 
-    localStorage.removeItem("loggedin");
+    sessionStorage.clear();
 
     window.location.href = "login.html";
 
