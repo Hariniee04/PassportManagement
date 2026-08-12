@@ -12,6 +12,16 @@ DB_PASSWORD=your-mysql-root-password
 
 Set the project SDK to Java 21, then run `PassportBackendApplication`.
 
+## Run in VS Code
+
+Install the **Extension Pack for Java** and the **Spring Boot Extension Pack** by VMware. Open the `PassportManagement` folder, then open a terminal in the `backend` folder and run:
+
+```powershell
+.\mvnw.cmd spring-boot:run
+```
+
+The first run downloads Maven and the required Spring Boot dependencies. It does not require a global Maven installation.
+
 ## Temporary staff passwords
 
 These are development-only defaults. Change them using environment variables in the run configuration:
