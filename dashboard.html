@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Passport Management System</title>
+    <title>Dashboard - Passport Services</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="dashboard-page">
     <nav class="navbar navbar-expand navbar-dark app-nav">
         <div class="container">
             <a class="navbar-brand" href="index.html">Passport Services</a>
@@ -15,24 +15,123 @@
         </div>
     </nav>
 
-    <main class="container mt-5">
-        <section class="card shadow-sm p-4 p-md-5">
-            <h1 class="text-center">Welcome, <span id="username"></span></h1>
-            <p class="text-center text-muted mb-4">Select an option below to view available passport services.</p>
+    <main class="container dashboard-main">
+        <section class="dashboard-hero">
+            <div>
+                <span class="eyebrow">APPLICANT PORTAL (ACADEMIC SIMULATION)</span>
+                <h1>Welcome back, <span id="username"></span></h1>
+                <p>Track your passport application status, manage payments, and view appointment details.</p>
+            </div>
+            <a class="btn btn-primary" id="primaryActionBtn" href="application.html">Apply for New Passport</a>
+        </section>
 
-            <div class="row g-3">
-                <div class="col-md-4"><button type="button" class="btn btn-outline-primary w-100 p-3">Apply for a new passport</button></div>
-                <div class="col-md-4"><button type="button" class="btn btn-outline-primary w-100 p-3">Renew passport</button></div>
-                <div class="col-md-4"><button type="button" class="btn btn-outline-primary w-100 p-3">Track application status</button></div>
-                <div class="col-md-4"><button type="button" class="btn btn-outline-primary w-100 p-3">Upload documents</button></div>
-                <div class="col-md-4"><button type="button" class="btn btn-outline-primary w-100 p-3">Update personal details</button></div>
-                <div class="col-md-4"><button type="button" class="btn btn-outline-primary w-100 p-3">General information</button></div>
+        <!-- Main Application Status Card -->
+        <section class="application-overview" aria-labelledby="journeyTitle">
+            <div class="overview-heading">
+                <div>
+                    <h2 id="journeyTitle">Application Status Overview</h2>
+                    <p id="journeyMessage">No active application found.</p>
+                </div>
+                <strong id="overallProgress">0% Complete</strong>
+            </div>
+            
+            <div class="progress journey-progress" role="progressbar" aria-label="Application progress">
+                <div id="progressBar" class="progress-bar" style="width: 0%"></div>
             </div>
 
-            <p class="text-center text-muted mt-5 mb-0">This dashboard will be updated with additional features later.</p>
+            <!-- Steps 1-3 Badges -->
+            <div class="journey-steps">
+                <div class="journey-step" id="stepApplication">
+                    <span>1</span>
+                    <div><strong>Application</strong><small id="subAppText">Details & Docs</small></div>
+                </div>
+                <div class="journey-step" id="stepPayment">
+                    <span>2</span>
+                    <div><strong>Payment</strong><small id="subPayText">Fee Payment</small></div>
+                </div>
+                <div class="journey-step" id="stepAppointment">
+                    <span>3</span>
+                    <div><strong>Appointment</strong><small id="subApptText">PSK Slot</small></div>
+                </div>
+            </div>
+
+            <!-- Application Details Grid (Populated when active application exists) -->
+            <div id="activeAppSummary" class="mt-4 pt-3 border-top d-none">
+                <div class="row g-3">
+                    <div class="col-md-4"><strong>ARN:</strong> <span id="dashArn" class="text-primary font-weight-bold"></span></div>
+                    <div class="col-md-4"><strong>Quota / Type:</strong> <span id="dashType"></span></div>
+                    <div class="col-md-4"><strong>Current Status:</strong> <span id="dashStatus" class="status-badge status-pending"></span></div>
+                    
+                    <div class="col-md-4"><strong>Payment Status:</strong> <span id="dashPayment"></span></div>
+                    <div class="col-md-4"><strong>Appointment ID:</strong> <span id="dashApptId">N/A</span></div>
+                    <div class="col-md-4"><strong>PSK Location:</strong> <span id="dashPsk">N/A</span></div>
+                    
+                    <div class="col-md-4"><strong>Appointment Date:</strong> <span id="dashDate">N/A</span></div>
+                    <div class="col-md-4"><strong>Appointment Time:</strong> <span id="dashTime">N/A</span></div>
+                    <div class="col-md-4"><strong>Reschedules Left:</strong> <span id="dashReschedules">N/A</span></div>
+                </div>
+
+                <div class="d-flex gap-2 flex-wrap mt-4" id="dashActionButtons">
+                    <a id="btnPayFee" href="payment.html" class="btn btn-sm btn-success d-none">Pay Fee</a>
+                    <a id="btnBookAppt" href="appointment.html" class="btn btn-sm btn-primary d-none">Schedule Appointment</a>
+                    <a id="btnReschedule" href="appointment.html" class="btn btn-sm btn-outline-warning d-none">Reschedule Appointment</a>
+                    <button type="button" id="btnPrintAppt" class="btn btn-sm btn-outline-secondary d-none" onclick="window.print()">Print Appointment Slip</button>
+                </div>
+            </div>
+
+            <!-- Status-Only Timeline Tracker for Post-Appointment -->
+            <div id="postAppointmentTimeline" class="mt-4 pt-3 border-top d-none">
+                <h4 class="h6 font-weight-bold text-uppercase text-secondary">Official Post-Appointment Processing Pipeline (Status Only)</h4>
+                <div class="timeline-tracker">
+                    <div class="timeline-item done">
+                        <div class="timeline-badge">✓</div>
+                        <div><strong>Online Application & Payment</strong> <small class="text-muted d-block">Submitted online by applicant</small></div>
+                    </div>
+                    <div class="timeline-item done" id="tlItemAppt">
+                        <div class="timeline-badge">✓</div>
+                        <div><strong>Appointment Confirmed</strong> <small class="text-muted d-block">Slot scheduled at PSK / POPSK</small></div>
+                    </div>
+                    <div class="timeline-item" id="tlItemPsk">
+                        <div class="timeline-badge">4</div>
+                        <div><strong>Visit PSK / POPSK (In-Person Verification & Biometrics)</strong> <small class="text-muted d-block">Physical document verification and photo/fingerprint capture</small></div>
+                    </div>
+                    <div class="timeline-item" id="tlItemPolice">
+                        <div class="timeline-badge">5</div>
+                        <div><strong>Police Verification</strong> <small class="text-muted d-block">Verification report by designated local police station</small></div>
+                    </div>
+                    <div class="timeline-item" id="tlItemPrint">
+                        <div class="timeline-badge">6</div>
+                        <div><strong>Passport Printing & Dispatch</strong> <small class="text-muted d-block">Passport printing, quality check, and speed post dispatch</small></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Services Grid -->
+        <section class="dashboard-actions">
+            <article class="dashboard-service primary-service">
+                <div class="dashboard-icon">+</div>
+                <span class="service-kicker">FRESH PASSPORT</span>
+                <h2 id="applicationCardTitle">Apply for a New Passport</h2>
+                <p id="applicationCardText">Fill in your application details, upload documents, and complete your submission.</p>
+                <a id="applicationAction" class="btn btn-primary" href="application.html">Start Application</a>
+            </article>
+            <article class="dashboard-service">
+                <div class="dashboard-icon">↻</div>
+                <span class="service-kicker">COMING SOON</span>
+                <h2>Renew / Reissue Passport</h2>
+                <p>Request a reissue for an expired, expiring, damaged, or lost passport.</p>
+                <button type="button" class="btn btn-outline-secondary" disabled>Available Soon</button>
+            </article>
+            <article class="dashboard-service">
+                <div class="dashboard-icon">⌕</div>
+                <span class="service-kicker">STATUS TRACKER</span>
+                <h2>Track Application Status</h2>
+                <p>See live progress, payment receipts, appointment slips, and post-appointment milestones.</p>
+                <button type="button" class="btn btn-outline-secondary" id="btnTrackStatus" onclick="window.scrollTo({top: 300, behavior: 'smooth'})">Track Status</button>
+            </article>
         </section>
     </main>
-
     <script src="js/dashboard.js"></script>
 </body>
 </html>
