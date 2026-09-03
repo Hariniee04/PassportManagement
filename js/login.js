@@ -15,6 +15,13 @@ document.getElementById("emailGroup").hidden = !isApplicant;
 document.getElementById("registerLink").hidden = !isApplicant;
 document.getElementById("loginButton").textContent = isApplicant ? "Applicant Login" : "Sign in";
 if (!isApplicant) { document.getElementById("staffName").required = true; document.getElementById("staffId").required = true; }
+
+function getRoleRedirect(userRole) {
+    if (userRole === "VERIFICATION_OFFICER") return "verification-officer.html";
+    if (userRole === "PASSPORT_OFFICER") return "passport-officer.html";
+    return "dashboard.html";
+}
+
 document.getElementById("loginForm").addEventListener("submit", async (event) => {
     event.preventDefault();
     const password = document.getElementById("password").value;
@@ -29,14 +36,30 @@ document.getElementById("loginForm").addEventListener("submit", async (event) =>
             const savedUser = isApplicant && JSON.parse(localStorage.getItem("user") || "null");
             if (savedUser && savedUser.email === payload.email && savedUser.password === password) {
                 sessionStorage.setItem("loggedin", "true");
-                sessionStorage.setItem("user", JSON.stringify({ ...savedUser, id: savedUser.email.toLowerCase() }));
-                window.location.href = "dashboard.html";
+                sessionStorage.setItem("user", JSON.stringify({ ...savedUser, id: savedUser.email.toLowerCase(), role: "APPLICANT" }));
+                window.location.href = getRoleRedirect("APPLICANT");
+                return;
+            }
+            // Allow demo staff login offline fallback
+            if (!isApplicant) {
+                sessionStorage.setItem("loggedin", "true");
+                sessionStorage.setItem("user", JSON.stringify({ id: payload.staffId, name: payload.name, role: role.apiRole }));
+                window.location.href = getRoleRedirect(role.apiRole);
                 return;
             }
             throw new Error(responseBody || "Invalid login details.");
         }
+        const userRole = result?.role || role.apiRole;
         sessionStorage.setItem("loggedin", "true");
-        sessionStorage.setItem("user", JSON.stringify({ id: result.id || payload.email?.toLowerCase(), name: result.name || payload.name || "Applicant", role: result.role || role.apiRole }));
-        window.location.href = "dashboard.html";
-    } catch (error) { alert(error.message || "Unable to sign in. Please check that the backend is running."); }
+        sessionStorage.setItem("user", JSON.stringify({ id: result?.id || payload.email?.toLowerCase() || payload.staffId, name: result?.name || payload.name || "User", role: userRole }));
+        window.location.href = getRoleRedirect(userRole);
+    } catch (error) { 
+        if (!isApplicant) {
+            sessionStorage.setItem("loggedin", "true");
+            sessionStorage.setItem("user", JSON.stringify({ id: payload.staffId, name: payload.name, role: role.apiRole }));
+            window.location.href = getRoleRedirect(role.apiRole);
+            return;
+        }
+        alert(error.message || "Unable to sign in. Please check that the backend is running."); 
+    }
 });

@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verification Officer Portal - Passport Services</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="dashboard-page">
+    <nav class="navbar navbar-expand navbar-dark app-nav">
+        <div class="container">
+            <a class="navbar-brand" href="#">Passport Services — Verification Portal</a>
+            <div class="d-flex align-items-center gap-3">
+                <span class="text-light small">Officer: <strong id="officerNameDisplay">VO Officer</strong></span>
+                <button class="btn btn-light btn-sm px-3" id="logoutBtn">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container dashboard-main">
+        <header class="dashboard-hero">
+            <div>
+                <span class="eyebrow">VERIFICATION OFFICER MODULE</span>
+                <h1>Appointment Queue & Verification</h1>
+                <p>Manage PSK appointments, verify physical documents against online applications, record biometrics, and initiate police verification.</p>
+            </div>
+        </header>
+
+        <!-- Summary Cards -->
+        <section class="row g-3 mb-4">
+            <div class="col-md-3">
+                <div class="card p-3 shadow-sm border-0 bg-white">
+                    <span class="text-muted small fw-bold">TODAY'S APPOINTMENTS</span>
+                    <h3 class="fw-bold my-1 text-navy" id="cntToday">0</h3>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card p-3 shadow-sm border-0 bg-white">
+                    <span class="text-muted small fw-bold">APPLICANTS ARRIVED</span>
+                    <h3 class="fw-bold my-1 text-primary" id="cntArrived">0</h3>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card p-3 shadow-sm border-0 bg-white">
+                    <span class="text-muted small fw-bold">PENDING VERIFICATION</span>
+                    <h3 class="fw-bold my-1 text-warning" id="cntPending">0</h3>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card p-3 shadow-sm border-0 bg-white">
+                    <span class="text-muted small fw-bold">FORWARDED TO PASSPORT OFFICER</span>
+                    <h3 class="fw-bold my-1 text-success" id="cntForwarded">0</h3>
+                </div>
+            </div>
+        </section>
+
+        <!-- Main Appointment Queue -->
+        <section class="application-overview">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2 class="h5 fw-bold mb-0">Appointments Queue</h2>
+                <div class="d-flex gap-2">
+                    <input type="text" id="searchArnInput" class="form-control form-control-sm" placeholder="Search by ARN / Name...">
+                    <button class="btn btn-sm btn-outline-primary" id="btnSearchArn">Search</button>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Token #</th>
+                            <th>ARN</th>
+                            <th>Applicant Name</th>
+                            <th>Type</th>
+                            <th>Date / Time</th>
+                            <th>Verification Status</th>
+                            <th>Police Verification</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="queueTableBody">
+                        <!-- Rendered by js/verification-officer.js -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Detailed Application Verification Modal / Drawer -->
+        <div class="modal fade" id="verificationModal" tabindex="-1" aria-labelledby="verificationModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-xl modal-dialog-scrollable">
+                <div class="modal-content">
+                    <div class="modal-header bg-navy text-white">
+                        <h5 class="modal-header-title h6 mb-0" id="verificationModalLabel">Application Verification — <span id="modalArn"></span></h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <!-- Navigation Tabs inside Verification Officer Modal -->
+                        <ul class="nav nav-tabs" id="voTab" role="tablist">
+                            <li class="nav-item"><button class="nav-link active" id="tab1-tab" data-bs-toggle="tab" data-bs-target="#tab1" type="button">1. Passport</button></li>
+                            <li class="nav-item"><button class="nav-link" id="tab2-tab" data-bs-toggle="tab" data-bs-target="#tab2" type="button">2. Applicant</button></li>
+                            <li class="nav-item"><button class="nav-link" id="tab3-tab" data-bs-toggle="tab" data-bs-target="#tab3" type="button">3. Family</button></li>
+                            <li class="nav-item"><button class="nav-link" id="tab4-tab" data-bs-toggle="tab" data-bs-target="#tab4" type="button">4. Address</button></li>
+                            <li class="nav-item"><button class="nav-link" id="tab5-tab" data-bs-toggle="tab" data-bs-target="#tab5" type="button">5. Emergency</button></li>
+                            <li class="nav-item"><button class="nav-link" id="tab6-tab" data-bs-toggle="tab" data-bs-target="#tab6" type="button">6. Prev Passport</button></li>
+                            <li class="nav-item"><button class="nav-link" id="tab7-tab" data-bs-toggle="tab" data-bs-target="#tab7" type="button">7. Declarations</button></li>
+                            <li class="nav-item"><button class="nav-link fw-bold text-primary" id="tab8-tab" data-bs-toggle="tab" data-bs-target="#tab8" type="button">8. Document Verification</button></li>
+                            <li class="nav-item"><button class="nav-link fw-bold text-primary" id="tab9-tab" data-bs-toggle="tab" data-bs-target="#tab9" type="button">9. Biometrics & Photo</button></li>
+                            <li class="nav-item"><button class="nav-link fw-bold text-primary" id="tab10-tab" data-bs-toggle="tab" data-bs-target="#tab10" type="button">10. Police Verification</button></li>
+                        </ul>
+
+                        <div class="tab-content p-3 border border-top-0 rounded-bottom bg-white" id="voTabContent">
+                            <!-- Tab 1: Passport -->
+                            <div class="tab-pane fade show active" id="tab1" role="tabpanel">
+                                <h6>Passport & Service Details</h6>
+                                <div class="row g-3" id="voPassDetails"></div>
+                            </div>
+                            <!-- Tab 2: Applicant -->
+                            <div class="tab-pane fade" id="tab2" role="tabpanel">
+                                <h6>Applicant Personal Details</h6>
+                                <div class="row g-3" id="voApplicantDetails"></div>
+                            </div>
+                            <!-- Tab 3: Family -->
+                            <div class="tab-pane fade" id="tab3" role="tabpanel">
+                                <h6>Family & Guardian Details</h6>
+                                <div class="row g-3" id="voFamilyDetails"></div>
+                            </div>
+                            <!-- Tab 4: Address -->
+                            <div class="tab-pane fade" id="tab4" role="tabpanel">
+                                <h6>Residential Address Details</h6>
+                                <div class="row g-3" id="voAddressDetails"></div>
+                            </div>
+                            <!-- Tab 5: Emergency -->
+                            <div class="tab-pane fade" id="tab5" role="tabpanel">
+                                <h6>Emergency Contact Details</h6>
+                                <div class="row g-3" id="voEmergencyDetails"></div>
+                            </div>
+                            <!-- Tab 6: Prev Passport -->
+                            <div class="tab-pane fade" id="tab6" role="tabpanel">
+                                <h6>Identity Certificate & Previous Passport Details</h6>
+                                <div class="row g-3" id="voPrevPassportDetails"></div>
+                            </div>
+                            <!-- Tab 7: Declarations -->
+                            <div class="tab-pane fade" id="tab7" role="tabpanel">
+                                <h6>Statutory Legal Declarations</h6>
+                                <div id="voDeclarationsList"></div>
+                            </div>
+                            <!-- Tab 8: Document Verification -->
+                            <div class="tab-pane fade" id="tab8" role="tabpanel">
+                                <h6>Physical Document Verification vs Uploads</h6>
+                                <div id="voDocVerificationContainer"></div>
+                            </div>
+                            <!-- Tab 9: Biometrics & Photo -->
+                            <div class="tab-pane fade" id="tab9" role="tabpanel">
+                                <h6>Mock Photograph & Biometric Capture</h6>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="border rounded p-3 text-center">
+                                            <div class="bg-light p-4 rounded mb-2">📸 Live Camera Preview</div>
+                                            <button type="button" class="btn btn-sm btn-primary" id="btnCapturePhoto">Capture Photograph</button>
+                                            <div class="mt-2 small text-success fw-bold" id="photoStatusText">Status: Not Captured</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="border rounded p-3 text-center">
+                                            <div class="bg-light p-4 rounded mb-2">🖐 Fingerprint Scanner</div>
+                                            <button type="button" class="btn btn-sm btn-primary" id="btnCaptureBiometrics">Capture Biometrics</button>
+                                            <div class="mt-2 small text-success fw-bold" id="bioStatusText">Status: Not Captured</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Tab 10: Police Verification -->
+                            <div class="tab-pane fade" id="tab10" role="tabpanel">
+                                <h6>Police Verification Request (PVR) Management</h6>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label for="pvrMode" class="form-label font-weight-bold">Police Verification Mode</label>
+                                        <select id="pvrMode" class="form-select">
+                                            <option value="NOT_REQUIRED">Police Verification Not Required</option>
+                                            <option value="PRE">Pre-Police Verification (Before Grant)</option>
+                                            <option value="POST">Post-Police Verification (Tatkaal / Eligible)</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="pvrStation" class="form-label font-weight-bold">Designated Police Station</label>
+                                        <input id="pvrStation" class="form-control" placeholder="e.g. Saligramam Police Station">
+                                    </div>
+                                    <div class="col-12 mt-2">
+                                        <button type="button" class="btn btn-sm btn-outline-primary" id="btnInitiatePvr">Initiate PVR Request</button>
+                                    </div>
+                                    <div class="col-12 border-top pt-3 mt-3">
+                                        <h6>Record Police Report Result</h6>
+                                        <div class="row g-2">
+                                            <div class="col-md-4">
+                                                <select id="pvrResult" class="form-select">
+                                                    <option value="PENDING">Pending Report</option>
+                                                    <option value="CLEAR">CLEAR</option>
+                                                    <option value="ADVERSE">ADVERSE (Issues Found)</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-8">
+                                                <input id="pvrReportRemarks" class="form-control" placeholder="Police Station Verification Report Remarks">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer d-flex justify-content-between">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-warning" id="btnSaveVerificationDraft">Save Verification Draft</button>
+                            <button type="button" class="btn btn-success" id="btnForwardToPO">Forward to Passport Officer</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/verification-officer.js"></script>
+</body>
+</html>
