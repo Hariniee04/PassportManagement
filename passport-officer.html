@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Passport Officer Portal - Passport Services</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="dashboard-page">
+    <nav class="navbar navbar-expand navbar-dark app-nav">
+        <div class="container">
+            <a class="navbar-brand" href="#">Passport Services — Passport Officer Portal</a>
+            <div class="d-flex align-items-center gap-3">
+                <span class="text-light small">Passport Officer: <strong id="poNameDisplay">PO Officer</strong></span>
+                <button class="btn btn-light btn-sm px-3" id="logoutBtn">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container dashboard-main">
+        <header class="dashboard-hero">
+            <div>
+                <span class="eyebrow">PASSPORT OFFICER DECISION & DISPATCH MODULE</span>
+                <h1>Case Review & Granting Portal</h1>
+                <p>Review completed verification reports, evaluate police verification outcomes, make final granting decisions, and manage backend dispatch.</p>
+            </div>
+        </header>
+
+        <!-- Summary Cards -->
+        <section class="row g-3 mb-4">
+            <div class="col-md-3">
+                <div class="card p-3 shadow-sm border-0 bg-white">
+                    <span class="text-muted small fw-bold">PENDING PO REVIEW</span>
+                    <h3 class="fw-bold my-1 text-warning" id="cntReview">0</h3>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card p-3 shadow-sm border-0 bg-white">
+                    <span class="text-muted small fw-bold">ADVERSE POLICE REPORTS</span>
+                    <h3 class="fw-bold my-1 text-danger" id="cntAdverse">0</h3>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card p-3 shadow-sm border-0 bg-white">
+                    <span class="text-muted small fw-bold">PASSPORTS GRANTED</span>
+                    <h3 class="fw-bold my-1 text-success" id="cntGranted">0</h3>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card p-3 shadow-sm border-0 bg-white">
+                    <span class="text-muted small fw-bold">DISPATCHED</span>
+                    <h3 class="fw-bold my-1 text-info" id="cntDispatched">0</h3>
+                </div>
+            </div>
+        </section>
+
+        <!-- Review Queue Table -->
+        <section class="application-overview">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2 class="h5 fw-bold mb-0">Applications Pending Grant Decision</h2>
+                <div class="d-flex gap-2">
+                    <input type="text" id="poSearchInput" class="form-control form-control-sm" placeholder="Filter by ARN / Name...">
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>ARN</th>
+                            <th>Applicant Name</th>
+                            <th>Type</th>
+                            <th>Verification Status</th>
+                            <th>Police Verification</th>
+                            <th>Overall Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="poQueueBody">
+                        <!-- Rendered by js/passport-officer.js -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Detailed Case Review Modal -->
+        <div class="modal fade" id="poReviewModal" tabindex="-1" aria-labelledby="poReviewModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-xl modal-dialog-scrollable">
+                <div class="modal-content">
+                    <div class="modal-header bg-navy text-white">
+                        <h5 class="modal-header-title h6 mb-0" id="poReviewModalLabel">Passport Officer Case Review — <span id="poModalArn"></span></h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <!-- 12-Tab Case Reviewer -->
+                        <ul class="nav nav-tabs" id="poTab" role="tablist">
+                            <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#poTab1" type="button">Application</button></li>
+                            <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#poTab2" type="button">Applicant</button></li>
+                            <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#poTab3" type="button">Family</button></li>
+                            <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#poTab4" type="button">Address</button></li>
+                            <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#poTab5" type="button">Emergency</button></li>
+                            <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#poTab6" type="button">Prev Passport</button></li>
+                            <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#poTab7" type="button">Other Details</button></li>
+                            <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#poTab8" type="button">Documents</button></li>
+                            <li class="nav-item"><button class="nav-link fw-bold text-success" data-bs-toggle="tab" data-bs-target="#poTab9" type="button">VO Report</button></li>
+                            <li class="nav-item"><button class="nav-link fw-bold text-success" data-bs-toggle="tab" data-bs-target="#poTab10" type="button">Biometrics</button></li>
+                            <li class="nav-item"><button class="nav-link fw-bold text-success" data-bs-toggle="tab" data-bs-target="#poTab11" type="button">PVR Review</button></li>
+                            <li class="nav-item"><button class="nav-link fw-bold text-navy" data-bs-toggle="tab" data-bs-target="#poTab12" type="button">Dispatch Pipeline</button></li>
+                        </ul>
+
+                        <div class="tab-content p-3 border border-top-0 rounded-bottom bg-white" id="poTabContent">
+                            <div class="tab-pane fade show active" id="poTab1" role="tabpanel">
+                                <h6>Passport & Service Overview</h6>
+                                <div class="row g-3" id="poPassOverview"></div>
+                            </div>
+                            <div class="tab-pane fade" id="poTab2" role="tabpanel">
+                                <h6>Applicant Personal Information</h6>
+                                <div class="row g-3" id="poApplicantOverview"></div>
+                            </div>
+                            <div class="tab-pane fade" id="poTab3" role="tabpanel">
+                                <h6>Family & Spouse Details</h6>
+                                <div class="row g-3" id="poFamilyOverview"></div>
+                            </div>
+                            <div class="tab-pane fade" id="poTab4" role="tabpanel">
+                                <h6>Address & Communication</h6>
+                                <div class="row g-3" id="poAddressOverview"></div>
+                            </div>
+                            <div class="tab-pane fade" id="poTab5" role="tabpanel">
+                                <h6>Emergency Contact Info</h6>
+                                <div class="row g-3" id="poEmergencyOverview"></div>
+                            </div>
+                            <div class="tab-pane fade" id="poTab6" role="tabpanel">
+                                <h6>Prior Passport History</h6>
+                                <div class="row g-3" id="poPrevPassportOverview"></div>
+                            </div>
+                            <div class="tab-pane fade" id="poTab7" role="tabpanel">
+                                <h6>Statutory Legal Declarations</h6>
+                                <div id="poDeclarationsOverview"></div>
+                            </div>
+                            <div class="tab-pane fade" id="poTab8" role="tabpanel">
+                                <h6>Uploaded Documents Review</h6>
+                                <div id="poDocOverview"></div>
+                            </div>
+                            <div class="tab-pane fade" id="poTab9" role="tabpanel">
+                                <h6>Verification Officer Inspection Summary</h6>
+                                <div id="poVoReportOverview"></div>
+                            </div>
+                            <div class="tab-pane fade" id="poTab10" role="tabpanel">
+                                <h6>Biometric & Facial Photo Capture Report</h6>
+                                <div id="poBiometricsOverview"></div>
+                            </div>
+                            <div class="tab-pane fade" id="poTab11" role="tabpanel">
+                                <h6>Police Verification Report (PVR) Outcome</h6>
+                                <div id="poPvrOverview"></div>
+                            </div>
+                            <div class="tab-pane fade" id="poTab12" role="tabpanel">
+                                <h6>Mock Backend Dispatch Pipeline</h6>
+                                <div id="poDispatchPipelineContainer"></div>
+                            </div>
+                        </div>
+
+                        <!-- Final Decision Section -->
+                        <div class="border rounded p-3 bg-light mt-4">
+                            <h5 class="fw-bold text-navy">Final Granting Decision</h5>
+                            <div class="row g-3 mt-1">
+                                <div class="col-md-6">
+                                    <label for="poDecisionSelect" class="form-label font-weight-bold">Officer Action</label>
+                                    <select id="poDecisionSelect" class="form-select">
+                                        <option value="GRANT">GRANT PASSPORT</option>
+                                        <option value="HOLD">PUT ON HOLD</option>
+                                        <option value="CLARIFICATION_REQUIRED">REQUEST CLARIFICATION</option>
+                                        <option value="RE_VERIFICATION_REQUIRED">REQUEST RE-VERIFICATION</option>
+                                        <option value="REJECT">REJECT APPLICATION</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="poRemarksInput" class="form-label font-weight-bold">Decision Remarks / Justification</label>
+                                    <input id="poRemarksInput" class="form-control" placeholder="Enter officer decision notes">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer d-flex justify-content-between">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-success btn-lg" id="btnConfirmDecision">Execute Decision</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/passport-officer.js"></script>
+</body>
+</html>
