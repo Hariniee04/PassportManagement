@@ -8,61 +8,16 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <nav class="navbar navbar-expand navbar-dark app-nav">
-        <div class="container">
-            <a class="navbar-brand" href="index.html">Passport Services</a>
-            <a href="login.html" class="btn btn-light btn-sm px-3">Login</a>
-        </div>
-    </nav>
-
+    <nav class="navbar navbar-expand navbar-dark app-nav"><div class="container"><a class="navbar-brand" href="index.html">Passport Services</a></div></nav>
     <main>
-        <section class="hero-section">
-            <div class="container text-center">
-                <span class="eyebrow">ONLINE PASSPORT PORTAL</span>
-                <h1>Passport services, made simple.</h1>
-                <p class="hero-copy">Apply, renew, or track your passport request from one secure place.</p>
-                <a href="login.html" class="btn btn-primary btn-lg px-4">Login to continue</a>
-            </div>
-        </section>
-
-        <section class="container services-section">
-            <div class="text-center mb-4">
-                <h2>What would you like to do?</h2>
-                <p class="text-muted mb-0">Choose a service and sign in to get started.</p>
-            </div>
-            <div class="row g-4 justify-content-center">
-                <div class="col-sm-6 col-lg-3">
-                    <article class="service-card">
-                        <div class="service-icon">01</div>
-                        <h3>Apply for a passport</h3>
-                        <p>Start a new passport application and submit your documents online.</p>
-                    </article>
-                </div>
-                <div class="col-sm-6 col-lg-3">
-                    <article class="service-card">
-                        <div class="service-icon">02</div>
-                        <h3>Renew a passport</h3>
-                        <p>Renew an expired, expiring, damaged, or lost passport.</p>
-                    </article>
-                </div>
-                <div class="col-sm-6 col-lg-3">
-                    <article class="service-card">
-                        <div class="service-icon">03</div>
-                        <h3>Track application</h3>
-                        <p>View your application progress and receive important updates.</p>
-                    </article>
-                </div>
-                <div class="col-sm-6 col-lg-3">
-                    <article class="service-card">
-                        <div class="service-icon">04</div>
-                        <h3>Manage documents</h3>
-                        <p>Upload requested documents and keep your details up to date.</p>
-                    </article>
-                </div>
-            </div>
-        </section>
+        <section class="hero-section"><div class="container text-center"><span class="eyebrow">ONLINE PASSPORT PORTAL</span><h1>Welcome to Passport Services</h1><p class="hero-copy">Select your role to sign in.</p></div></section>
+        <section class="container role-section"><div class="row g-4 justify-content-center">
+            <div class="col-sm-6 col-lg-3"><a class="role-card" href="login.html?role=applicant"><span class="role-icon">01</span><h2>Applicant</h2><span>Sign in or create an account</span></a></div>
+            <div class="col-sm-6 col-lg-3"><a class="role-card" href="login.html?role=passport-officer"><span class="role-icon">02</span><h2>Passport Officer</h2><span>Officer sign in</span></a></div>
+            <div class="col-sm-6 col-lg-3"><a class="role-card" href="login.html?role=verification-officer"><span class="role-icon">03</span><h2>Verification Officer</h2><span>Officer sign in</span></a></div>
+            <div class="col-sm-6 col-lg-3"><a class="role-card" href="login.html?role=admin"><span class="role-icon">04</span><h2>Administrator</h2><span>Administrator sign in</span></a></div>
+        </div></section>
     </main>
-
     <footer class="app-footer">&copy; 2026 Passport Management System</footer>
 </body>
 </html>

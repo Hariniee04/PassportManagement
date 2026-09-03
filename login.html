@@ -8,63 +8,18 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="auth-page">
-    <nav class="navbar navbar-expand navbar-dark app-nav">
-        <div class="container"><a class="navbar-brand" href="index.html">Passport Services</a></div>
-    </nav>
-    <main class="auth-main container">
-        <div class="text-center mb-4">
-            <span class="eyebrow">SECURE ACCESS</span>
-            <h1>Sign in</h1>
-            <p class="text-muted">Choose the login box for your role.</p>
-        </div>
-        <div class="row g-4 justify-content-center">
-            <div class="col-sm-10 col-md-6 col-xl-3">
-                <section class="auth-card h-100">
-                    <h2 class="h4">Applicant</h2>
-                    <p class="text-muted small">Use the account you registered.</p>
-                    <form class="applicant-login-form">
-                        <div class="mb-3"><label for="applicantEmail" class="form-label">Email address</label><input id="applicantEmail" type="email" class="form-control" required></div>
-                        <div class="mb-3"><label for="applicantPassword" class="form-label">Password</label><input id="applicantPassword" type="password" class="form-control" required></div>
-                        <button class="btn btn-primary w-100" type="submit">Applicant Login</button>
-                    </form>
-                    <a href="register.html" class="btn btn-outline-primary w-100 mt-3">Create applicant account</a>
-                </section>
-            </div>
-            <div class="col-sm-10 col-md-6 col-xl-3">
-                <section class="auth-card h-100">
-                    <h2 class="h4">Passport Officer</h2>
-                    <form class="staff-login-form" data-role="PASSPORT_OFFICER">
-                        <div class="mb-3"><label class="form-label">Name</label><input name="name" type="text" class="form-control" required></div>
-                        <div class="mb-3"><label class="form-label">Officer ID</label><input name="staffId" type="text" class="form-control" required></div>
-                        <div class="mb-3"><label class="form-label">Assigned Password</label><input name="password" type="password" class="form-control" required></div>
-                        <button class="btn btn-primary w-100" type="submit">Officer Login</button>
-                    </form>
-                </section>
-            </div>
-            <div class="col-sm-10 col-md-6 col-xl-3">
-                <section class="auth-card h-100">
-                    <h2 class="h4">Verification Officer</h2>
-                    <form class="staff-login-form" data-role="VERIFICATION_OFFICER">
-                        <div class="mb-3"><label class="form-label">Name</label><input name="name" type="text" class="form-control" required></div>
-                        <div class="mb-3"><label class="form-label">Officer ID</label><input name="staffId" type="text" class="form-control" required></div>
-                        <div class="mb-3"><label class="form-label">Assigned Password</label><input name="password" type="password" class="form-control" required></div>
-                        <button class="btn btn-primary w-100" type="submit">Officer Login</button>
-                    </form>
-                </section>
-            </div>
-            <div class="col-sm-10 col-md-6 col-xl-3">
-                <section class="auth-card h-100">
-                    <h2 class="h4">Administrator</h2>
-                    <form class="staff-login-form" data-role="ADMIN">
-                        <div class="mb-3"><label class="form-label">Name</label><input name="name" type="text" class="form-control" required></div>
-                        <div class="mb-3"><label class="form-label">Admin ID</label><input name="staffId" type="text" class="form-control" required></div>
-                        <div class="mb-3"><label class="form-label">Assigned Password</label><input name="password" type="password" class="form-control" required></div>
-                        <button class="btn btn-primary w-100" type="submit">Admin Login</button>
-                    </form>
-                </section>
-            </div>
-        </div>
-    </main>
+    <nav class="navbar navbar-expand navbar-dark app-nav"><div class="container"><a class="navbar-brand" href="index.html">Passport Services</a></div></nav>
+    <main class="auth-main container"><section class="auth-card single-auth-card">
+        <a class="back-link" href="index.html">&larr; Choose another role</a>
+        <span class="eyebrow" id="roleLabel">SECURE ACCESS</span><h1 id="loginTitle">Sign in</h1><p class="text-muted" id="loginDescription"></p>
+        <form id="loginForm">
+            <div id="staffFields" hidden><div class="mb-3"><label for="staffName" class="form-label">Name</label><input id="staffName" type="text" class="form-control"></div><div class="mb-3"><label for="staffId" class="form-label">Staff ID</label><input id="staffId" type="text" class="form-control"></div></div>
+            <div class="mb-3" id="emailGroup"><label for="email" class="form-label">Email address</label><input id="email" type="email" class="form-control" required></div>
+            <div class="mb-3"><label for="password" class="form-label">Password</label><input id="password" type="password" class="form-control" required></div>
+            <button class="btn btn-primary w-100" id="loginButton" type="submit">Sign in</button>
+        </form>
+        <a id="registerLink" href="register.html" class="btn btn-outline-primary w-100 mt-3">Create applicant account</a>
+    </section></main>
     <script src="js/login.js"></script>
 </body>
 </html>
