@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instructions for Passport Office Visit - Passport Services</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="application-page">
+    <nav class="navbar navbar-expand navbar-dark app-nav">
+        <div class="container">
+            <a class="navbar-brand" href="dashboard.html">Passport Services</a>
+            <a class="btn btn-light btn-sm px-3" href="dashboard.html">Back to Dashboard</a>
+        </div>
+    </nav>
+    <main class="container application-main">
+        <header class="application-header">
+            <span class="eyebrow">APPOINTMENT INSTRUCTIONS</span>
+            <h1>Instructions for Passport Office Visit</h1>
+            <p>Please review these mandatory guidelines before reporting to the Passport Seva Kendra (PSK) / POPSK.</p>
+        </header>
+
+        <!-- Appointment Summary Banner -->
+        <section class="application-overview mb-4">
+            <div class="row g-3">
+                <div class="col-md-4"><strong>ARN:</strong> <span id="dispArn" class="text-primary fw-bold"></span></div>
+                <div class="col-md-4"><strong>Applicant Name:</strong> <span id="dispName"></span></div>
+                <div class="col-md-4"><strong>Application Type:</strong> <span id="dispType"></span></div>
+                <div class="col-md-4"><strong>PSK / POPSK Location:</strong> <span id="dispPsk" class="fw-bold"></span></div>
+                <div class="col-md-4"><strong>Appointment Date:</strong> <span id="dispDate" class="text-success fw-bold"></span></div>
+                <div class="col-md-4"><strong>Appointment Time:</strong> <span id="dispTime" class="text-success fw-bold"></span></div>
+            </div>
+        </section>
+
+        <!-- Section 1: Before Your Appointment -->
+        <section class="form-panel">
+            <div class="panel-content">
+                <h2 class="h5 fw-bold text-navy">1. Before Your Appointment</h2>
+                <ul class="mt-2 text-secondary">
+                    <li>Check your appointment date, reporting time, and PSK location carefully.</li>
+                    <li>Carry a printed copy of your <strong>Appointment Confirmation Slip / Application Reference Number (ARN)</strong>.</li>
+                    <li>Arrive at the Passport Office / PSK at least 15 minutes before your scheduled reporting time.</li>
+                    <li>Ensure all details submitted online match your physical identity documents exactly.</li>
+                    <li>If any details have changed after online submission, notify the counter officer during document verification.</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Section 2: Documents to Bring (Dynamic Checklist) -->
+        <section class="form-panel">
+            <div class="panel-content">
+                <h2 class="h5 fw-bold text-navy">2. Mandatory Documents to Bring</h2>
+                <p class="text-muted small">Below is the document checklist generated dynamically based on your application entries.</p>
+
+                <div class="table-responsive">
+                    <table class="table table-bordered align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Category</th>
+                                <th>Required Document</th>
+                                <th>Original Required</th>
+                                <th>Photocopies Required</th>
+                            </tr>
+                        </thead>
+                        <tbody id="documentChecklistBody">
+                            <!-- Populated dynamically via JS -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="alert alert-warning small mt-2">
+                    <strong>Important Note:</strong> Documents uploaded online during application submission are for reference only. <strong>Original documents MUST be physically produced at the PSK.</strong>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: At the Passport Office -->
+        <section class="form-panel">
+            <div class="panel-content">
+                <h2 class="h5 fw-bold text-navy">3. What Happens at the Passport Office</h2>
+                <ol class="mt-2 text-secondary">
+                    <li><strong>Token Issuance:</strong> Show your ARN slip at the entry counter to receive your processing token number.</li>
+                    <li><strong>Document Verification:</strong> The Verification Officer will inspect your original documents against your submitted application.</li>
+                    <li><strong>Photograph & Biometric Capture:</strong> Live facial photograph and fingerprint scans will be recorded at the counters.</li>
+                    <li><strong>Verification Review:</strong> Officer will confirm identity checks and request police verification or forward your case to the Passport Officer.</li>
+                </ol>
+            </div>
+        </section>
+
+        <!-- Section 4: Tatkaal Specific Instructions (If Applicable) -->
+        <section id="tatkaalSection" class="form-panel border-warning d-none">
+            <div class="panel-content">
+                <h2 class="h5 fw-bold text-dark">4. Tatkaal Service Specific Instructions</h2>
+                <p class="text-secondary small">As your application is submitted under <strong>Tatkaal Service</strong>, please note:</p>
+                <ul class="text-secondary">
+                    <li>Bring your completed and signed <strong>Tatkaal Annexure Undertaking</strong> along with original supporting proof.</li>
+                    <li>You must produce 3 acceptable original Annexure documents as declared in your application.</li>
+                    <li>Police verification for eligible Tatkaal applicants is conducted on a post-passport-issuance basis.</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Section 5: Important Warning Box -->
+        <div class="alert alert-danger p-3 mb-4">
+            <h5 class="alert-heading fw-bold">Important Notice</h5>
+            <p class="mb-0 small">Do not bring digital copies on mobile phones only. You MUST produce physical original documents. Appointment booking does not guarantee automatic passport issuance; final approval is subject to physical verification and administrative clearance.</p>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-5">
+            <a href="dashboard.html" class="btn btn-outline-secondary">Back to Dashboard</a>
+            <div class="d-flex gap-2">
+                <a href="application.html" class="btn btn-outline-primary">View Submitted Form</a>
+                <button type="button" class="btn btn-primary" onclick="window.print()">Print Appointment Slip</button>
+            </div>
+        </div>
+    </main>
+
+    <script src="js/instructions.js"></script>
+</body>
+</html>

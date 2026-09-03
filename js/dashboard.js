@@ -73,6 +73,7 @@ if (appData) {
             document.getElementById("dashReschedules").textContent = `${left} left`;
 
             document.getElementById("btnPrintAppt")?.classList.remove("d-none");
+            document.getElementById("btnInstructions")?.classList.remove("d-none");
 
             if (left > 0) {
                 document.getElementById("btnReschedule")?.classList.remove("d-none");
