@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fee Payment - Passport Services</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="application-page">
+    <nav class="navbar navbar-expand navbar-dark app-nav">
+        <div class="container">
+            <a class="navbar-brand" href="dashboard.html">Passport Services</a>
+            <a class="btn btn-light btn-sm px-3" href="dashboard.html">Back to dashboard</a>
+        </div>
+    </nav>
+    <main class="container application-main">
+        <header class="application-header">
+            <span class="eyebrow">STEP 2: PAYMENT SIMULATION</span>
+            <h1>Pay Passport Fee</h1>
+            <p>Payment must be completed prior to scheduling an appointment slot at a Passport Seva Kendra.</p>
+        </header>
+
+        <section class="form-panel">
+            <div class="panel-content">
+                <h2>Application Overview</h2>
+                <div class="row g-3 my-2">
+                    <div class="col-md-6"><strong>Application Reference Number (ARN):</strong> <span id="dispArn" class="text-primary font-weight-bold"></span></div>
+                    <div class="col-md-6"><strong>Applicant Name:</strong> <span id="dispName"></span></div>
+                    <div class="col-md-6"><strong>Application Type:</strong> <span id="dispType"></span></div>
+                    <div class="col-md-6"><strong>Booklet Type:</strong> <span id="dispBooklet"></span></div>
+                </div>
+
+                <h3 class="mt-4">Fee Breakdown</h3>
+                <table class="fee-table">
+                    <thead>
+                        <tr>
+                            <th>Description</th>
+                            <th>Amount (₹)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Base Passport Fee</td>
+                            <td id="dispBaseFee">₹0</td>
+                        </tr>
+                        <tr id="rowTatkaalFee" class="d-none">
+                            <td>Tatkaal Additional Fee</td>
+                            <td id="dispTatkaalFee">₹0</td>
+                        </tr>
+                        <tr class="fw-bold table-light">
+                            <td>Total Amount Payable</td>
+                            <td id="dispTotalFee" class="text-success fs-5">₹0</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3 class="mt-4">Select Payment Method (Simulation)</h3>
+                <form id="paymentForm">
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="radio" name="payMethod" id="payUPI" value="UPI" checked>
+                        <label class="form-check-label fw-bold" for="payUPI">UPI (Google Pay / PhonePe / Paytm)</label>
+                    </div>
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="radio" name="payMethod" id="payCard" value="Credit/Debit Card">
+                        <label class="form-check-label fw-bold" for="payCard">Credit / Debit Card</label>
+                    </div>
+                    <div class="form-check mb-4">
+                        <input class="form-check-input" type="radio" name="payMethod" id="payNet" value="Internet Banking">
+                        <label class="form-check-label fw-bold" for="payNet">Internet Banking</label>
+                    </div>
+
+                    <div class="alert alert-secondary small">
+                        <strong>Academic Project Notice:</strong> This is a simulated payment gateway. No actual money will be charged.
+                    </div>
+
+                    <button type="submit" class="btn btn-success btn-lg w-100 mt-2">Simulate Payment & Complete</button>
+                </form>
+            </div>
+        </section>
+    </main>
+    <script src="js/payment.js"></script>
+</body>
+</html>
