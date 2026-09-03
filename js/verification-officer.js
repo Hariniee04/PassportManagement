@@ -48,7 +48,8 @@ function ensureSeedData() {
                 appointmentTime: "10:00 AM",
                 tokenNo: "TOK-101",
                 verificationStatus: "SCHEDULED",
-                policeVerificationStatus: "NOT_REQUIRED",
+                pvrMode: "PRE-PV",
+                policeVerificationStatus: "PENDING",
                 status: "APPOINTMENT_CONFIRMED",
                 address: "Flat 4B, Blue Lagoon Apts, Anna Nagar",
                 city: "Chennai",
@@ -80,6 +81,7 @@ function ensureSeedData() {
                 appointmentTime: "10:30 AM",
                 tokenNo: "TOK-102",
                 verificationStatus: "ARRIVED",
+                pvrMode: "POST-PV",
                 policeVerificationStatus: "PENDING",
                 status: "APPLICANT_VISITED",
                 address: "12, MG Road, Nungambakkam",
@@ -128,15 +130,21 @@ function renderQueue(filterTerm = "") {
             return;
         }
 
+        const isTatkaal = app.serviceType === "Tatkaal";
+        const pvLabel = isTatkaal ? "POST-PV REQUIRED" : "PRE-PV REQUIRED";
+
         const tr = document.createElement("tr");
         tr.innerHTML = `
             <td><span class="badge bg-secondary">${app.tokenNo || 'Pending'}</span></td>
             <td class="fw-bold text-primary">${app.arn}</td>
             <td>${app.givenName || ''} ${app.surname || ''}</td>
-            <td><span class="badge ${app.serviceType === 'Tatkaal' ? 'bg-danger' : 'bg-info'}">${app.serviceType || 'Normal'}</span></td>
+            <td><span class="badge ${isTatkaal ? 'bg-danger' : 'bg-info'}">${app.serviceType || 'Normal'}</span></td>
             <td>${app.appointmentDate || ''} <br><small class="text-muted">${app.appointmentTime || ''}</small></td>
             <td><span class="status-badge ${getStatusBadgeClass(app.verificationStatus)}">${app.verificationStatus || 'SCHEDULED'}</span></td>
-            <td><span class="status-badge ${getPvrBadgeClass(app.policeVerificationStatus)}">${app.policeVerificationStatus || 'NOT_REQUIRED'}</span></td>
+            <td>
+                <span class="fw-bold small d-block ${isTatkaal ? 'text-primary' : 'text-warning'}">${pvLabel}</span>
+                <span class="status-badge ${getPvrBadgeClass(app.policeVerificationStatus)}">${app.policeVerificationStatus || 'PENDING'}</span>
+            </td>
             <td>
                 <div class="btn-group btn-group-sm">
                     ${app.verificationStatus === 'SCHEDULED' ? `<button class="btn btn-outline-success" onclick="markArrived('${app.arn}')">Mark Arrived</button>` : ''}
@@ -187,7 +195,6 @@ window.openVerificationModal = function(arn) {
     activeModalApp = app;
     document.getElementById("modalArn").textContent = app.arn;
 
-    // Render tab details
     renderTabDetails(app);
 
     const modal = new bootstrap.Modal(document.getElementById("verificationModal"));
@@ -195,6 +202,9 @@ window.openVerificationModal = function(arn) {
 };
 
 function renderTabDetails(app) {
+    const isTatkaal = app.serviceType === "Tatkaal";
+    const pvrModeText = isTatkaal ? "POST-PV (Post-Police Verification for Tatkaal)" : "PRE-PV (Pre-Police Verification for Normal)";
+
     // Tab 1: Passport
     document.getElementById("voPassDetails").innerHTML = `
         <div class="col-md-4"><strong>ARN:</strong> ${app.arn}</div>
@@ -290,6 +300,7 @@ function renderTabDetails(app) {
     document.getElementById("bioStatusText").textContent = app.biometricStatus || "Status: Not Captured";
 
     // Tab 10 PVR fields
+    document.getElementById("pvrMode").value = pvrModeText;
     if (app.pvrStation) document.getElementById("pvrStation").value = app.pvrStation;
     if (app.policeVerificationStatus) document.getElementById("pvrResult").value = app.policeVerificationStatus;
 }
@@ -316,16 +327,17 @@ function setupEvents() {
 
     document.getElementById("btnInitiatePvr")?.addEventListener("click", () => {
         if (!activeModalApp) return;
-        const mode = document.getElementById("pvrMode").value;
+        const isTatkaal = activeModalApp.serviceType === "Tatkaal";
+        const mode = isTatkaal ? "POST-PV" : "PRE-PV";
         const station = document.getElementById("pvrStation").value || "Designated Police Station";
         const pvrId = `PVR-2026-${Math.floor(100000 + Math.random() * 900000)}`;
 
         activeModalApp.pvrId = pvrId;
         activeModalApp.pvrMode = mode;
         activeModalApp.pvrStation = station;
-        activeModalApp.policeVerificationStatus = mode === "NOT_REQUIRED" ? "NOT_REQUIRED" : "PENDING";
+        activeModalApp.policeVerificationStatus = "PENDING";
 
-        alert(`Police Verification Request initiated!\n\nPVR Request ID: ${pvrId}\nStation: ${station}\nMode: ${mode}`);
+        alert(`Police Verification Request initiated!\n\nPVR Request ID: ${pvrId}\nStation: ${station}\nAuto-Assigned Mode: ${mode}`);
     });
 
     document.getElementById("btnForwardToPO")?.addEventListener("click", () => {
@@ -335,15 +347,18 @@ function setupEvents() {
         const index = apps.findIndex(a => a.arn === activeModalApp.arn);
 
         if (index !== -1) {
+            const isTatkaal = activeModalApp.serviceType === "Tatkaal";
             const pvrRes = document.getElementById("pvrResult").value;
+            
             apps[index].verificationStatus = "FORWARDED";
-            apps[index].policeVerificationStatus = pvrRes || "CLEAR";
+            apps[index].pvrMode = isTatkaal ? "POST-PV" : "PRE-PV";
+            apps[index].policeVerificationStatus = pvrRes || "PENDING";
             apps[index].status = "PASSPORT_OFFICER_REVIEW";
             apps[index].verificationOfficerId = sessionUser.id;
             apps[index].verificationDate = new Date().toLocaleString();
 
             localStorage.setItem("allPassportApplications", JSON.stringify(apps));
-            alert(`Application ${activeModalApp.arn} has been successfully verified and forwarded to the Passport Officer.`);
+            alert(`Application ${activeModalApp.arn} verified and forwarded to Passport Officer.\nPV Mode: ${apps[index].pvrMode}`);
             
             const modalEl = document.getElementById("verificationModal");
             const modal = bootstrap.Modal.getInstance(modalEl);

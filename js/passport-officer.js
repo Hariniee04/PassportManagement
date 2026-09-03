@@ -198,17 +198,27 @@ function setupPoEvents() {
         const index = apps.findIndex(a => a.arn === activePoModalApp.arn);
 
         if (index !== -1) {
-            apps[index].passportOfficerDecision = decision;
-            apps[index].passportOfficerRemarks = remarks;
-            apps[index].passportOfficerId = sessionUser.id;
-            apps[index].decisionDate = new Date().toLocaleString();
+            const targetApp = apps[index];
+            const isNormal = targetApp.serviceType !== "Tatkaal";
+            const pvStatus = targetApp.policeVerificationStatus || "PENDING";
+
+            // Guard: Normal applications require PRE-PV CLEAR before GRANT
+            if (decision === "GRANT" && isNormal && pvStatus !== "CLEAR") {
+                alert(`Cannot Grant Normal Passport!\n\nNormal processing type requires Pre-Police Verification (PRE-PV) to be CLEAR before passport grant. Current PV Status: ${pvStatus}`);
+                return;
+            }
+
+            targetApp.passportOfficerDecision = decision;
+            targetApp.passportOfficerRemarks = remarks;
+            targetApp.passportOfficerId = sessionUser.id;
+            targetApp.decisionDate = new Date().toLocaleString();
 
             if (decision === "GRANT") {
-                apps[index].status = "GRANTED";
-                apps[index].mockPassportNumber = `P${Math.floor(1000000 + Math.random() * 9000000)}`;
-                alert(`PASSPORT GRANTED!\n\nApplication ARN: ${activePoModalApp.arn}\nGenerated Mock Passport Number: ${apps[index].mockPassportNumber}`);
+                targetApp.status = "GRANTED";
+                targetApp.mockPassportNumber = `P${Math.floor(1000000 + Math.random() * 9000000)}`;
+                alert(`PASSPORT GRANTED!\n\nApplication ARN: ${activePoModalApp.arn}\nProcessing Type: ${targetApp.serviceType || 'Normal'}\nGenerated Mock Passport Number: ${targetApp.mockPassportNumber}`);
             } else {
-                apps[index].status = decision;
+                targetApp.status = decision;
                 alert(`Decision executed: ${decision}`);
             }
 
