@@ -10,7 +10,16 @@ document.getElementById("logout").addEventListener("click", () => {
 });
 
 const draftKey = `passportApplicationDraft:${sessionUser?.id || sessionUser?.email?.toLowerCase()}`;
-const appData = JSON.parse(localStorage.getItem(draftKey) || "null");
+let appData = JSON.parse(localStorage.getItem(draftKey) || "null");
+
+// Check if updated in allPassportApplications
+const allApps = JSON.parse(localStorage.getItem("allPassportApplications") || "[]");
+if (appData && appData.arn) {
+    const matchingApp = allApps.find(a => a.arn === appData.arn);
+    if (matchingApp) {
+        appData = { ...appData, ...matchingApp };
+    }
+}
 
 if (appData) {
     const isSubmitted = appData.submitted === true;
@@ -77,6 +86,35 @@ if (appData) {
 
             if (left > 0) {
                 document.getElementById("btnReschedule")?.classList.remove("d-none");
+            }
+
+            // Arrival status update
+            if (appData.applicantArrived) {
+                document.getElementById("tlItemPsk")?.classList.add("done");
+                document.getElementById("badgePsk").textContent = "✓";
+                document.getElementById("txtPskSub").textContent = `Applicant Arrived (Token ${appData.tokenNo || ''})`;
+            }
+
+            // Police Verification status card update
+            const pvrStatus = appData.policeVerificationStatus || "NOT_INITIATED";
+            if (pvrStatus !== "NOT_INITIATED") {
+                const pvrCard = document.getElementById("dashPvrCard");
+                pvrCard?.classList.remove("d-none");
+
+                document.getElementById("pvrCardStatus").textContent = pvrStatus;
+                document.getElementById("pvrCardMode").textContent = appData.pvrMode || (appData.serviceType === "Tatkaal" ? "POST-PV" : "PRE-PV");
+                document.getElementById("pvrCardDate").textContent = appData.pvrInitiatedDate || "-";
+                document.getElementById("pvrCardId").textContent = appData.pvrId || "-";
+
+                const isTatkaal = appData.serviceType === "Tatkaal";
+                if (isTatkaal) {
+                    document.getElementById("pvrCardNote").textContent = "Police verification will be conducted post-issuance of passport under Tatkaal scheme.";
+                } else {
+                    document.getElementById("pvrCardNote").textContent = "Police verification is currently in progress. Estimated completion: approximately 1–3 weeks. You do not need to take any action at this stage.";
+                }
+
+                document.getElementById("tlItemPolice")?.classList.add(pvrStatus === "CLEAR" ? "done" : "current");
+                if (pvrStatus === "CLEAR") document.getElementById("badgePolice").textContent = "✓";
             }
         } else if (isPaid) {
             document.getElementById("btnBookAppt")?.classList.remove("d-none");

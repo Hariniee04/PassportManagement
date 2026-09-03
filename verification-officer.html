@@ -185,18 +185,21 @@
                                     <div class="col-12 mt-2">
                                         <button type="button" class="btn btn-sm btn-outline-primary" id="btnInitiatePvr">Initiate PVR Request</button>
                                     </div>
+                                    <div class="col-12 mt-3" id="pvrInfoBox">
+                                        <!-- Populated via JS -->
+                                    </div>
                                     <div class="col-12 border-top pt-3 mt-3">
                                         <h6>Record Police Report Result</h6>
                                         <div class="row g-2">
                                             <div class="col-md-4">
-                                                <select id="pvrResult" class="form-select">
+                                                <select id="pvrResult" class="form-select" disabled>
                                                     <option value="PENDING">Pending Report</option>
                                                     <option value="CLEAR">CLEAR</option>
                                                     <option value="ADVERSE">ADVERSE (Issues Found)</option>
                                                 </select>
                                             </div>
                                             <div class="col-md-8">
-                                                <input id="pvrReportRemarks" class="form-control" placeholder="Police Station Verification Report Remarks">
+                                                <input id="pvrReportRemarks" class="form-control" placeholder="Police Station Verification Report Remarks" disabled>
                                             </div>
                                         </div>
                                     </div>

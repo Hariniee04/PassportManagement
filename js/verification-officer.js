@@ -1,17 +1,3 @@
-const sessionUser = JSON.parse(sessionStorage.getItem("user") || "null");
-if (sessionStorage.getItem("loggedin") !== "true" || !sessionUser || sessionUser.role !== "VERIFICATION_OFFICER") {
-    // Allow demo access if staff role logged in
-    if (!sessionUser || (sessionUser.role !== "VERIFICATION_OFFICER" && sessionUser.role !== "ADMIN")) {
-        window.location.href = "login.html?role=verification-officer";
-    }
-}
-
-document.getElementById("officerNameDisplay").textContent = sessionUser?.name || "Verification Officer";
-document.getElementById("logoutBtn").addEventListener("click", () => {
-    sessionStorage.clear();
-    window.location.href = "index.html";
-});
-
 // Demo seed applications if none exist in localStorage
 function ensureSeedData() {
     let allApps = JSON.parse(localStorage.getItem("allPassportApplications") || "[]");
@@ -46,10 +32,11 @@ function ensureSeedData() {
                 pskLocation: "Chennai PSK (Saligramam)",
                 appointmentDate: "2026-09-03",
                 appointmentTime: "10:00 AM",
-                tokenNo: "TOK-101",
-                verificationStatus: "SCHEDULED",
+                tokenNo: null,
+                applicantArrived: false,
+                verificationStatus: "NOT_STARTED",
                 pvrMode: "PRE-PV",
-                policeVerificationStatus: "PENDING",
+                policeVerificationStatus: "NOT_INITIATED",
                 status: "APPOINTMENT_CONFIRMED",
                 address: "Flat 4B, Blue Lagoon Apts, Anna Nagar",
                 city: "Chennai",
@@ -79,10 +66,12 @@ function ensureSeedData() {
                 pskLocation: "Chennai PSK (Saligramam)",
                 appointmentDate: "2026-09-03",
                 appointmentTime: "10:30 AM",
-                tokenNo: "TOK-102",
-                verificationStatus: "ARRIVED",
+                tokenNo: "#042",
+                applicantArrived: true,
+                arrivalTime: "10:12 AM",
+                verificationStatus: "IN_PROGRESS",
                 pvrMode: "POST-PV",
-                policeVerificationStatus: "PENDING",
+                policeVerificationStatus: "NOT_INITIATED",
                 status: "APPLICANT_VISITED",
                 address: "12, MG Road, Nungambakkam",
                 city: "Chennai",
@@ -122,9 +111,9 @@ function renderQueue(filterTerm = "") {
         if (!app.submitted) return;
 
         cntToday++;
-        if (app.verificationStatus === "ARRIVED") cntArrived++;
-        if (app.verificationStatus === "SCHEDULED" || app.verificationStatus === "ARRIVED") cntPending++;
-        if (app.verificationStatus === "FORWARDED") cntForwarded++;
+        if (app.applicantArrived) cntArrived++;
+        if (app.verificationStatus === "NOT_STARTED" || app.verificationStatus === "IN_PROGRESS") cntPending++;
+        if (app.verificationStatus === "FORWARDED" || app.verificationStatus === "COMPLETED") cntForwarded++;
 
         if (filterTerm && !app.arn.toLowerCase().includes(filterTerm.toLowerCase()) && !`${app.givenName} ${app.surname}`.toLowerCase().includes(filterTerm.toLowerCase())) {
             return;
@@ -132,23 +121,26 @@ function renderQueue(filterTerm = "") {
 
         const isTatkaal = app.serviceType === "Tatkaal";
         const pvLabel = isTatkaal ? "POST-PV REQUIRED" : "PRE-PV REQUIRED";
+        const isArrived = app.applicantArrived === true;
 
         const tr = document.createElement("tr");
         tr.innerHTML = `
-            <td><span class="badge bg-secondary">${app.tokenNo || 'Pending'}</span></td>
+            <td>
+                ${isArrived ? `<span class="badge bg-primary fs-6">${app.tokenNo}</span>` : `<span class="badge bg-secondary">NOT GENERATED</span>`}
+            </td>
             <td class="fw-bold text-primary">${app.arn}</td>
             <td>${app.givenName || ''} ${app.surname || ''}</td>
             <td><span class="badge ${isTatkaal ? 'bg-danger' : 'bg-info'}">${app.serviceType || 'Normal'}</span></td>
             <td>${app.appointmentDate || ''} <br><small class="text-muted">${app.appointmentTime || ''}</small></td>
-            <td><span class="status-badge ${getStatusBadgeClass(app.verificationStatus)}">${app.verificationStatus || 'SCHEDULED'}</span></td>
+            <td><span class="status-badge ${getStatusBadgeClass(app.verificationStatus)}">${app.verificationStatus || 'NOT_STARTED'}</span></td>
             <td>
                 <span class="fw-bold small d-block ${isTatkaal ? 'text-primary' : 'text-warning'}">${pvLabel}</span>
-                <span class="status-badge ${getPvrBadgeClass(app.policeVerificationStatus)}">${app.policeVerificationStatus || 'PENDING'}</span>
+                <span class="status-badge ${getPvrBadgeClass(app.policeVerificationStatus)}">${app.policeVerificationStatus || 'NOT_INITIATED'}</span>
             </td>
             <td>
                 <div class="btn-group btn-group-sm">
-                    ${app.verificationStatus === 'SCHEDULED' ? `<button class="btn btn-outline-success" onclick="markArrived('${app.arn}')">Mark Arrived</button>` : ''}
-                    <button class="btn btn-outline-primary" onclick="openVerificationModal('${app.arn}')">Verify & View</button>
+                    ${!isArrived ? `<button class="btn btn-outline-success" onclick="markArrived('${app.arn}')">Mark Applicant Arrived</button>` : ''}
+                    ${isArrived ? `<button class="btn btn-primary" onclick="openVerificationModal('${app.arn}')">${app.verificationStatus === 'IN_PROGRESS' ? 'Continue Verification' : 'Start Verification'}</button>` : `<button class="btn btn-outline-secondary" disabled title="Mark arrived to start verification">Start Verification</button>`}
                 </div>
             </td>
         `;
@@ -162,29 +154,39 @@ function renderQueue(filterTerm = "") {
 }
 
 function getStatusBadgeClass(status) {
-    if (status === "ARRIVED") return "status-pending";
-    if (status === "FORWARDED" || status === "VERIFICATION_COMPLETED") return "status-success";
+    if (status === "IN_PROGRESS") return "status-pending";
+    if (status === "FORWARDED" || status === "COMPLETED") return "status-success";
     return "bg-light text-dark";
 }
 
 function getPvrBadgeClass(status) {
     if (status === "CLEAR") return "status-success";
     if (status === "ADVERSE") return "bg-danger text-white";
-    if (status === "PENDING" || status === "REQUESTED") return "status-pending";
+    if (status === "INITIATED" || status === "PENDING" || status === "REQUESTED") return "status-pending";
     return "bg-light text-dark";
 }
 
 window.markArrived = function(arn) {
     const apps = JSON.parse(localStorage.getItem("allPassportApplications") || "[]");
     const app = apps.find(a => a.arn === arn);
-    if (app) {
-        app.verificationStatus = "ARRIVED";
-        app.status = "APPLICANT_VISITED";
-        app.tokenNo = `TOK-${Math.floor(100 + Math.random() * 900)}`;
-        localStorage.setItem("allPassportApplications", JSON.stringify(apps));
-        renderQueue();
-        alert(`Applicant marked as Arrived. Token Number generated: ${app.tokenNo}`);
+    if (!app) return;
+
+    if (app.applicantArrived && app.tokenNo) {
+        alert(`Applicant is already marked as arrived. Token Number: ${app.tokenNo}`);
+        return;
     }
+
+    const tokenNum = `#${Math.floor(100 + Math.random() * 900)}`;
+    app.applicantArrived = true;
+    app.arrivalTime = new Date().toLocaleTimeString();
+    app.markedArrivedBy = sessionUser.name;
+    app.tokenNo = tokenNum;
+    app.verificationStatus = "IN_PROGRESS";
+    app.status = "APPLICANT_VISITED";
+
+    localStorage.setItem("allPassportApplications", JSON.stringify(apps));
+    renderQueue();
+    alert(`Applicant arrival confirmed!\n\nARN: ${arn}\nGenerated Token #: ${tokenNum}`);
 };
 
 window.openVerificationModal = function(arn) {
@@ -192,8 +194,13 @@ window.openVerificationModal = function(arn) {
     const app = apps.find(a => a.arn === arn);
     if (!app) return;
 
+    if (!app.applicantArrived) {
+        alert("Applicant has not arrived yet. Please mark applicant as arrived first.");
+        return;
+    }
+
     activeModalApp = app;
-    document.getElementById("modalArn").textContent = app.arn;
+    document.getElementById("modalArn").textContent = `${app.arn} (Token ${app.tokenNo || ''})`;
 
     renderTabDetails(app);
 
@@ -208,11 +215,13 @@ function renderTabDetails(app) {
     // Tab 1: Passport
     document.getElementById("voPassDetails").innerHTML = `
         <div class="col-md-4"><strong>ARN:</strong> ${app.arn}</div>
+        <div class="col-md-4"><strong>Token #:</strong> ${app.tokenNo || 'N/A'}</div>
         <div class="col-md-4"><strong>Application Type:</strong> ${app.serviceType || 'Normal'}</div>
         <div class="col-md-4"><strong>Booklet Type:</strong> ${app.bookletType || '36 pages'}</div>
         <div class="col-md-4"><strong>Submission Date:</strong> ${app.submissionDate || '-'}</div>
         <div class="col-md-4"><strong>Payment Status:</strong> ${app.paymentStatus || 'Pending'}</div>
         <div class="col-md-4"><strong>Appointment:</strong> ${app.appointmentDate || ''} ${app.appointmentTime || ''}</div>
+        ${app.lastSavedAt ? `<div class="col-12 mt-2 alert alert-light py-1 small">Draft saved on: <strong>${app.lastSavedAt}</strong> by <strong>${app.lastSavedBy || 'Officer'}</strong></div>` : ''}
     `;
 
     // Tab 2: Applicant
@@ -269,12 +278,12 @@ function renderTabDetails(app) {
             <h6 class="fw-bold">1. Address Proof Document</h6>
             <div class="row g-2 align-items-center">
                 <div class="col-md-3"><span class="badge bg-secondary">Uploaded: Address_Proof.pdf</span></div>
-                <div class="col-md-3"><label class="form-check-label"><input type="checkbox" class="form-check-input" checked> Original Presented</label></div>
-                <div class="col-md-3"><label class="form-check-label"><input type="checkbox" class="form-check-input" checked> Matches Upload</label></div>
+                <div class="col-md-3"><label class="form-check-label"><input type="checkbox" id="chkAddrOrig" class="form-check-input" ${app.voAddrOrig ? 'checked' : ''}> Original Presented</label></div>
+                <div class="col-md-3"><label class="form-check-label"><input type="checkbox" id="chkAddrMatch" class="form-check-input" ${app.voAddrMatch ? 'checked' : ''}> Matches Upload</label></div>
                 <div class="col-md-3">
-                    <select class="form-select form-select-sm">
-                        <option value="VERIFIED" selected>VERIFIED</option>
-                        <option value="MISMATCH">MISMATCH</option>
+                    <select id="selAddrResult" class="form-select form-select-sm">
+                        <option value="VERIFIED" ${app.voAddrResult === 'VERIFIED' ? 'selected' : ''}>VERIFIED</option>
+                        <option value="MISMATCH" ${app.voAddrResult === 'MISMATCH' ? 'selected' : ''}>MISMATCH</option>
                     </select>
                 </div>
             </div>
@@ -283,12 +292,12 @@ function renderTabDetails(app) {
             <h6 class="fw-bold">2. Date of Birth Proof Document</h6>
             <div class="row g-2 align-items-center">
                 <div class="col-md-3"><span class="badge bg-secondary">Uploaded: DOB_Proof.pdf</span></div>
-                <div class="col-md-3"><label class="form-check-label"><input type="checkbox" class="form-check-input" checked> Original Presented</label></div>
-                <div class="col-md-3"><label class="form-check-label"><input type="checkbox" class="form-check-input" checked> Matches Upload</label></div>
+                <div class="col-md-3"><label class="form-check-label"><input type="checkbox" id="chkDobOrig" class="form-check-input" ${app.voDobOrig ? 'checked' : ''}> Original Presented</label></div>
+                <div class="col-md-3"><label class="form-check-label"><input type="checkbox" id="chkDobMatch" class="form-check-input" ${app.voDobMatch ? 'checked' : ''}> Matches Upload</label></div>
                 <div class="col-md-3">
-                    <select class="form-select form-select-sm">
-                        <option value="VERIFIED" selected>VERIFIED</option>
-                        <option value="MISMATCH">MISMATCH</option>
+                    <select id="selDobResult" class="form-select form-select-sm">
+                        <option value="VERIFIED" ${app.voDobResult === 'VERIFIED' ? 'selected' : ''}>VERIFIED</option>
+                        <option value="MISMATCH" ${app.voDobResult === 'MISMATCH' ? 'selected' : ''}>MISMATCH</option>
                     </select>
                 </div>
             </div>
@@ -302,7 +311,34 @@ function renderTabDetails(app) {
     // Tab 10 PVR fields
     document.getElementById("pvrMode").value = pvrModeText;
     if (app.pvrStation) document.getElementById("pvrStation").value = app.pvrStation;
-    if (app.policeVerificationStatus) document.getElementById("pvrResult").value = app.policeVerificationStatus;
+
+    const isPvrInitiated = app.policeVerificationStatus && app.policeVerificationStatus !== "NOT_INITIATED";
+    const btnInitiate = document.getElementById("btnInitiatePvr");
+    const pvrResultSelect = document.getElementById("pvrResult");
+    const pvrRemarksInput = document.getElementById("pvrReportRemarks");
+
+    if (!isPvrInitiated) {
+        pvrResultSelect.disabled = true;
+        pvrRemarksInput.disabled = true;
+        document.getElementById("pvrInfoBox").innerHTML = `
+            <div class="alert alert-secondary small">Police verification has not been initiated yet. Click <strong>Initiate PVR Request</strong> to start asynchronous police verification.</div>
+        `;
+    } else {
+        pvrResultSelect.disabled = false;
+        pvrRemarksInput.disabled = false;
+        if (app.policeVerificationStatus) pvrResultSelect.value = app.policeVerificationStatus;
+        if (app.pvrReportRemarks) pvrRemarksInput.value = app.pvrReportRemarks;
+
+        document.getElementById("pvrInfoBox").innerHTML = `
+            <div class="alert alert-info small">
+                <strong>Police verification has been initiated.</strong><br>
+                <strong>Request ID:</strong> ${app.pvrId || 'N/A'}<br>
+                <strong>Initiated On:</strong> ${app.pvrInitiatedDate || '-'}<br>
+                <strong>Status:</strong> <span class="fw-bold">${app.policeVerificationStatus}</span><br>
+                <em>Expected completion: approximately 1–3 weeks (Academic Simulation Estimate).</em>
+            </div>
+        `;
+    }
 }
 
 function setupEvents() {
@@ -325,6 +361,12 @@ function setupEvents() {
         alert("Mock Fingerprint Biometrics Captured Successfully!");
     });
 
+    // Save Draft Event
+    document.getElementById("btnSaveVerificationDraft")?.addEventListener("click", () => {
+        saveVerificationData(false);
+    });
+
+    // Initiate PVR Event
     document.getElementById("btnInitiatePvr")?.addEventListener("click", () => {
         if (!activeModalApp) return;
         const isTatkaal = activeModalApp.serviceType === "Tatkaal";
@@ -335,13 +377,20 @@ function setupEvents() {
         activeModalApp.pvrId = pvrId;
         activeModalApp.pvrMode = mode;
         activeModalApp.pvrStation = station;
-        activeModalApp.policeVerificationStatus = "PENDING";
+        activeModalApp.pvrInitiatedDate = new Date().toLocaleDateString();
+        activeModalApp.policeVerificationStatus = "INITIATED";
 
-        alert(`Police Verification Request initiated!\n\nPVR Request ID: ${pvrId}\nStation: ${station}\nAuto-Assigned Mode: ${mode}`);
+        saveVerificationData(true);
+        renderTabDetails(activeModalApp);
+
+        alert(`Police Verification Request initiated!\n\nPVR Request ID: ${pvrId}\nStation: ${station}\nMode: ${mode}\nStatus: INITIATED (Estimated completion: 1–3 weeks)`);
     });
 
+    // Forward to PO Event
     document.getElementById("btnForwardToPO")?.addEventListener("click", () => {
         if (!activeModalApp) return;
+
+        saveVerificationData(true);
 
         const apps = JSON.parse(localStorage.getItem("allPassportApplications") || "[]");
         const index = apps.findIndex(a => a.arn === activeModalApp.arn);
@@ -352,7 +401,11 @@ function setupEvents() {
             
             apps[index].verificationStatus = "FORWARDED";
             apps[index].pvrMode = isTatkaal ? "POST-PV" : "PRE-PV";
-            apps[index].policeVerificationStatus = pvrRes || "PENDING";
+            if (pvrRes && pvrRes !== "PENDING") {
+                apps[index].policeVerificationStatus = pvrRes;
+            } else if (!apps[index].policeVerificationStatus || apps[index].policeVerificationStatus === "NOT_INITIATED") {
+                apps[index].policeVerificationStatus = "INITIATED";
+            }
             apps[index].status = "PASSPORT_OFFICER_REVIEW";
             apps[index].verificationOfficerId = sessionUser.id;
             apps[index].verificationDate = new Date().toLocaleString();
@@ -367,4 +420,37 @@ function setupEvents() {
             renderQueue();
         }
     });
+}
+
+function saveVerificationData(silent = false) {
+    if (!activeModalApp) return;
+
+    const apps = JSON.parse(localStorage.getItem("allPassportApplications") || "[]");
+    const index = apps.findIndex(a => a.arn === activeModalApp.arn);
+
+    if (index !== -1) {
+        activeModalApp.voAddrOrig = document.getElementById("chkAddrOrig")?.checked || false;
+        activeModalApp.voAddrMatch = document.getElementById("chkAddrMatch")?.checked || false;
+        activeModalApp.voAddrResult = document.getElementById("selAddrResult")?.value || "VERIFIED";
+
+        activeModalApp.voDobOrig = document.getElementById("chkDobOrig")?.checked || false;
+        activeModalApp.voDobMatch = document.getElementById("chkDobMatch")?.checked || false;
+        activeModalApp.voDobResult = document.getElementById("selDobResult")?.value || "VERIFIED";
+
+        activeModalApp.pvrStation = document.getElementById("pvrStation")?.value || activeModalApp.pvrStation;
+        if (!document.getElementById("pvrResult")?.disabled) {
+            activeModalApp.policeVerificationStatus = document.getElementById("pvrResult")?.value || activeModalApp.policeVerificationStatus;
+            activeModalApp.pvrReportRemarks = document.getElementById("pvrReportRemarks")?.value || "";
+        }
+
+        activeModalApp.lastSavedAt = new Date().toLocaleString();
+        activeModalApp.lastSavedBy = sessionUser.name;
+
+        apps[index] = { ...apps[index], ...activeModalApp };
+        localStorage.setItem("allPassportApplications", JSON.stringify(apps));
+
+        if (!silent) {
+            alert(`Verification draft saved successfully!\nSaved on: ${activeModalApp.lastSavedAt}`);
+        }
+    }
 }

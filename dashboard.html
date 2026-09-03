@@ -93,16 +93,32 @@
                         <div><strong>Appointment Confirmed</strong> <small class="text-muted d-block">Slot scheduled at PSK / POPSK</small></div>
                     </div>
                     <div class="timeline-item" id="tlItemPsk">
-                        <div class="timeline-badge">4</div>
-                        <div><strong>Visit PSK / POPSK (In-Person Verification & Biometrics)</strong> <small class="text-muted d-block">Physical document verification and photo/fingerprint capture</small></div>
+                        <div class="timeline-badge" id="badgePsk">4</div>
+                        <div><strong>Visit PSK / POPSK (In-Person Verification & Biometrics)</strong> <small class="text-muted d-block" id="txtPskSub">Physical document verification and photo/fingerprint capture</small></div>
                     </div>
                     <div class="timeline-item" id="tlItemPolice">
-                        <div class="timeline-badge">5</div>
-                        <div><strong>Police Verification</strong> <small class="text-muted d-block">Verification report by designated local police station</small></div>
+                        <div class="timeline-badge" id="badgePolice">5</div>
+                        <div><strong>Police Verification</strong> <small class="text-muted d-block" id="txtPoliceSub">Verification report by designated local police station</small></div>
                     </div>
                     <div class="timeline-item" id="tlItemPrint">
-                        <div class="timeline-badge">6</div>
-                        <div><strong>Passport Printing & Dispatch</strong> <small class="text-muted d-block">Passport printing, quality check, and speed post dispatch</small></div>
+                        <div class="timeline-badge" id="badgePrint">6</div>
+                        <div><strong>Passport Printing & Dispatch</strong> <small class="text-muted d-block" id="txtPrintSub">Passport printing, quality check, and speed post dispatch</small></div>
+                    </div>
+                </div>
+
+                <!-- Dedicated Police Verification Card for Applicant -->
+                <div class="card border mt-4 d-none" id="dashPvrCard">
+                    <div class="card-header bg-light fw-bold">POLICE VERIFICATION STATUS</div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-3"><strong>Status:</strong> <span id="pvrCardStatus" class="fw-bold text-primary">IN PROGRESS</span></div>
+                            <div class="col-md-3"><strong>Mode:</strong> <span id="pvrCardMode" class="badge bg-navy">PRE-PV</span></div>
+                            <div class="col-md-3"><strong>Initiated On:</strong> <span id="pvrCardDate">-</span></div>
+                            <div class="col-md-3"><strong>Request ID:</strong> <span id="pvrCardId">-</span></div>
+                            <div class="col-12 text-muted small mt-2" id="pvrCardNote">
+                                Police verification is currently in progress. Estimated completion: approximately 1–3 weeks. You do not need to take any action at this stage.
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
